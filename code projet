@@ -1,0 +1,187 @@
+//bibliothèques
+#include <iostream>
+#include <vector>
+#include <string>
+#include <stdexcept>
+
+using namespace std;
+//création de la classe contact avec 2 champs : nom et telephone
+class Contact {
+public:
+    Contact(string nom, string telephone) : nom(nom), telephone(telephone) {}
+    //getters
+    string getNom() const { return nom; }
+    string getTelephone() const { return telephone; }
+    //setters
+    void setNom(string nom) { this->nom = nom; }
+    void setTelephone(string telephone) { this->telephone = telephone; }
+private:
+    //champs du classe
+    string nom;
+    string telephone;
+};
+//crétion d'un carnet qui stocke les contacts
+class CarnetContacts {
+public:
+        //fonction pour ajouter un contact
+        void ajouterContact(Contact contact) {
+        //ajouter le contact créé au vecteur
+        contacts.push_back(contact);
+    } 
+    //fonction du recherche du contact par nom
+    Contact* rechercheParNom(string nom) {
+        /*boucle pour parcourir tous les contacts enregistrés pour vérifier la similitude entre le nom entré par l'utilisateur et les noms des contacts enregistrés*/
+        for (auto& contact : contacts) {
+            if (contact.getNom() == nom) {
+                return &contact;
+            }
+        }
+        return nullptr;
+    }
+    //fonction pour supprimer un contact 
+    void supprimerContact(string nom) {
+        /*boucle pour parcourir tous les contacts enregistrés pour détecter le contact a supprimer et les noms des contacts enregistrés*/
+        for (auto it = contacts.begin(); it != contacts.end(); ++it) {
+            if (it->getNom() == nom) {
+                //suppression du contact 
+                contacts.erase(it);
+                return;
+            }
+        }
+        /*dans le cas l'absence du similitude entre le contact a supprimer et la liste des contacts*/
+        throw invalid_argument("Contact non trouvé");
+    }
+    //fonction pour éditer un contact
+    void editerContact(string nom, string nouveauNom, string nouveauTelephone) {
+        Contact* contact = rechercheParNom(nom);
+        /*dans le cas de l'absence du contact a éditer dans la liste enregistrée*/
+        if (contact == nullptr) {
+            throw invalid_argument("Contact non trouvé");
+        }
+        //remplacement de l'encien nom par le nouveau nom
+        contact->setNom(nouveauNom);
+        contact->setTelephone(nouveauTelephone);
+    }
+    //fonction pour afficher les informations du contact 
+    void afficherContacts() {
+        for (auto& contact : contacts) {
+            cout << contact.getNom() << " : " << contact.getTelephone() << endl;
+        }
+    }
+private:
+    //création d'un vecteur pour stocker les contacts créés
+    vector<Contact> contacts;
+};
+/*fonction pour la vérification du numéro du téléphoe si ce dernier est un nombre ou pas*/
+bool estNombre(string s) {
+    for (char c : s) {
+        if (!isdigit(c)) {
+            return false;
+        }
+    }
+    return true;
+}
+/*fonction pour la validation du numéro du téléphone à l'aide du fonction estNombre*/
+void validerTelephone(string telephone) {
+    if (!estNombre(telephone)) {
+        throw invalid_argument("Numéro de téléphone invalide");
+    }
+}
+
+int main() {
+    //création d'un objet du classe CarnetContacts
+    CarnetContacts carnet;
+    //une boucle "while"pour traiter le choix saisi par l'utilisateur
+    while (true) {
+        //menu pour choisir la tache désirée
+        cout << "1. Ajouter un contact" << endl;
+        cout << "2. Rechercher un contact" << endl;
+        cout << "3. Supprimer un contact" << endl;
+        cout << "4. Editer un contact" << endl;
+        cout << "5. Afficher tous les contacts" << endl;
+        cout << "6. Quitter" << endl;
+        cout << "Votre choix : ";
+        int choix;
+        cin >> choix;
+        cin.ignore();
+        //traitement de chaque choix
+        try {
+            switch (choix) {
+            case 1: {
+                cout << "Nom : ";
+                string nom;
+                getline(cin, nom);
+                cout << "Téléphone : ";
+                string telephone;
+                getline(cin, telephone);
+                validerTelephone(telephone);
+                Contact contact(nom, telephone);
+                carnet.ajouterContact(contact);
+                cout << "Contact ajouté avec succès" << endl;
+                break;
+            }
+            case 2: {
+                cout << "Nom : ";
+                string nom;
+                getline(cin, nom);
+                Contact* contact = carnet.rechercheParNom(nom);
+                if (contact == nullptr) {
+                    cout << "Contact non trouvé" << endl;
+                } else {
+                    cout << contact->getNom() << " : " << contact->getTelephone() << endl;
+                }
+                break;
+            }
+            case 3: {
+                cout << "Nom : ";
+                string nom;
+                getline(cin, nom);
+                try {
+                     carnet.supprimerContact(nom);
+                     cout << "Contact supprimé avec succès" << endl;
+                    } 
+                catch (const invalid_argument& e)
+                    {
+                       cout << e.what() << endl;
+                    }
+                    break;
+            }
+            case 4: {
+                     cout << "Nom : ";
+                     string nom;
+                     getline(cin, nom);
+                     cout << "Nouveau nom : ";
+                     string nouveauNom;
+                     getline(cin, nouveauNom);
+                     cout << "Nouveau téléphone : ";
+                     string nouveauTelephone;
+                     getline(cin, nouveauTelephone);
+                     validerTelephone(nouveauTelephone);
+                     try {
+                           carnet.editerContact(nom, nouveauNom, nouveauTelephone);
+                           cout << "Contact modifié avec succès" << endl;
+                         } 
+                     catch (const invalid_argument& e) {
+                           cout << e.what() << endl;
+                        }
+                        break;
+                    }
+            case 5: {
+                     carnet.afficherContacts();
+                     break;
+                    }
+            case 6: {
+                     cout << "Au revoir !" << endl;
+            return 0;
+    }
+default: {
+             cout << "Choix invalide" << endl;
+             break;
+         }
+}
+} catch (const invalid_argument& e) {
+cout << e.what() << endl;
+}
+}
+return 0;
+}
